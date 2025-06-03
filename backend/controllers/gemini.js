@@ -1,5 +1,5 @@
 const runGeminiPrompt = require("../config/gemini");
-const Segment = require("../models/segment");
+const Segment = require("../models/Segment");
 
 exports.generateMessage = async (req, res) => {
   try {
