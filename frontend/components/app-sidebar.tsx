@@ -17,7 +17,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { useRouter } from 'next/navigation';
 
 const sidebarItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
@@ -28,7 +27,6 @@ const sidebarItems = [
 ];
 
 export function AppSidebar() {
-  const router = useRouter();
 
   const handleLogout = async () => {
     try {

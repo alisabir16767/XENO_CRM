@@ -19,18 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Campaign as CampaignType } from '@/types/campaign';
+
 
 interface UpdateCampaignDialogProps {
   campaignId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdated: (updatedCampaign: {
-    _id: string;
-    name: string;
-    segmentId: string | { _id: string };
-    message: string;
-    status: 'pending' | 'sent' | 'delivered' | 'failed';
-  }) => void;
+  onUpdated: (updatedCampaign: CampaignType) => void;
 }
 
 export default function UpdateCampaignDialog({

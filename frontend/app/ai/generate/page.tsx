@@ -21,13 +21,17 @@ export default function GenerateMessages() {
     setMessages([]);
     setTypedMessages([]);
     setCopiedIndex(null);
-
+  
     try {
       const results = await generateAIMessage(topic);
       setMessages(results);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError('Failed to generate messages. Try again later.');
+      setError(
+        err instanceof Error 
+          ? err.message 
+          : 'Failed to generate messages. Try again later.'
+      );
     } finally {
       setLoading(false);
     }

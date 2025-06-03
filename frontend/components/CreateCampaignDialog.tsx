@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   Dialog,
   DialogContent,
@@ -17,28 +19,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { Campaign, CampaignFormData, CampaignStatus, Segment } from '@/types/campaign';
 
-export default function CreateCampaignDialog() {
-  const [formData, setFormData] = useState({
+interface CreateCampaignDialogProps {
+  onCampaignCreated?: (newCampaign: Campaign) => void;
+  triggerText?: string;
+  className?: string;
+}
+
+export default function CreateCampaignDialog({
+  onCampaignCreated,
+  triggerText = "Create New Campaign",
+  className = "",
+}: CreateCampaignDialogProps) {
+  const [formData, setFormData] = useState<CampaignFormData>({
     name: '',
     segmentId: '',
     message: '',
     status: 'pending',
   });
 
-  const [segments, setSegments] = useState([]);
+  const [segments, setSegments] = useState<Segment[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch segments on mount
   useEffect(() => {
     const fetchSegments = async () => {
       try {
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/segments`
         );
-        setSegments(res.data.data); // Assuming your API returns { success, data: [...] }
+        setSegments(res.data.data);
       } catch (err) {
         console.error('Failed to fetch segments:', err);
         alert('Failed to load segments');
@@ -58,11 +68,17 @@ export default function CreateCampaignDialog() {
 
     setLoading(true);
     try {
-      await axios.post(
+      const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/campaigns`,
         { name, segmentId, message, status },
         { withCredentials: true }
       );
+
+      const newCampaign: Campaign = {
+        ...res.data.data,
+        segmentId: segments.find(s => s._id === segmentId) || segmentId
+      };
+
       alert('✅ Campaign created!');
       setFormData({
         name: '',
@@ -70,6 +86,10 @@ export default function CreateCampaignDialog() {
         message: '',
         status: 'pending',
       });
+
+      if (onCampaignCreated) {
+        onCampaignCreated(newCampaign);
+      }
     } catch (err) {
       console.error(err);
       alert('❌ Failed to create campaign');
@@ -78,20 +98,29 @@ export default function CreateCampaignDialog() {
     }
   };
 
+  const handleStatusChange = (value: string) => {
+    if (isCampaignStatus(value)) {
+      setFormData({ ...formData, status: value });
+    }
+  };
+
+  function isCampaignStatus(status: string): status is CampaignStatus {
+    return ['pending', 'sent', 'delivered', 'failed'].includes(status);
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button
           type="button"
-          className="bg-[#A9DFD8] text-black hover:bg-[#61c9bb] transition-colors duration-200"
+          className={`bg-[#A9DFD8] text-black hover:bg-[#61c9bb] transition-colors duration-200 ${className}`}
         >
-          Create New Campaign
+          {triggerText}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-[#02675a]">Create Campaign</DialogTitle>
-         
         </DialogHeader>
         <div className="space-y-4">
           <div>
@@ -105,6 +134,7 @@ export default function CreateCampaignDialog() {
               placeholder="Campaign name"
             />
           </div>
+
           <div>
             <Label htmlFor="segmentId">Segment</Label>
             <Select
@@ -125,6 +155,7 @@ export default function CreateCampaignDialog() {
               </SelectContent>
             </Select>
           </div>
+
           <div>
             <Label htmlFor="message">Message</Label>
             <Input
@@ -136,13 +167,12 @@ export default function CreateCampaignDialog() {
               placeholder="Campaign message"
             />
           </div>
+
           <div>
             <Label htmlFor="status">Status</Label>
             <Select
               value={formData.status}
-              onValueChange={(value) =>
-                setFormData({ ...formData, status: value })
-              }
+              onValueChange={handleStatusChange}
             >
               <SelectTrigger id="status" className="w-full">
                 <SelectValue placeholder="Select status" />
@@ -155,6 +185,7 @@ export default function CreateCampaignDialog() {
               </SelectContent>
             </Select>
           </div>
+
           <Button
             onClick={handleSubmit}
             disabled={loading}
@@ -162,7 +193,6 @@ export default function CreateCampaignDialog() {
           >
             {loading ? 'Creating...' : 'Submit'}
           </Button>
-          
         </div>
       </DialogContent>
     </Dialog>

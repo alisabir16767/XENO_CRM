@@ -14,26 +14,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import CreateCampaignDialog from '@/components/CreateCampaignDialog';
 import UpdateCampaignDialog from '@/components/UpdateCampaignDialog';
-
-type Segment = {
-  _id: string;
-  name: string;
-  audienceSize: number;
-};
-
-type Campaign = {
-  _id: string;
-  name: string;
-  status: string;
-  message: string;
-  created_at?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  segmentId: Segment | string;
-};
+import { Campaign as CampaignType} from '@/types/campaign';
 
 export default function CampaignsPage() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [campaigns, setCampaigns] = useState<CampaignType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -49,13 +33,21 @@ export default function CampaignsPage() {
       setLoading(true);
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/campaigns`);
       setCampaigns(res.data.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching campaigns:', err);
-      setError(
-        err.response?.data?.message ||
-        err.message ||
-        'Failed to load campaign data'
-      );
+  
+      if (axios.isAxiosError(err)) {
+        setError(
+          err.response?.data?.message ||
+          err.message ||
+          'Failed to load campaign data'
+        );
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Failed to load campaign data');
+      }
+  
       alert('Failed to fetch campaigns. Check console for details.');
     } finally {
       setLoading(false);
@@ -83,14 +75,14 @@ export default function CampaignsPage() {
     setDialogOpen(true);
   };
 
-  const handleCampaignUpdated = (updatedCampaign: Campaign) => {
+  const handleCampaignUpdated = (updatedCampaign: CampaignType) => {
     setCampaigns((prev) =>
       prev.map((c) => (c._id === updatedCampaign._id ? updatedCampaign : c))
     );
     alert('Campaign updated successfully');
   };
 
-  const handleCampaignCreated = (newCampaign: Campaign) => {
+  const handleCampaignCreated = (newCampaign: CampaignType) => {
     setCampaigns((prev) => [newCampaign, ...prev]);
     alert('Campaign created successfully');
   };
@@ -100,23 +92,19 @@ export default function CampaignsPage() {
 
   return (
     <div className="p-6 bg-[#2B2B36] rounded-2xl min-h-screen">
-     <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-  {/* Left side - Title */}
-  <h1 className="text-3xl font-bold text-white">Campaigns</h1>
-
-  {/* Right side - Buttons */}
-  <div className="flex gap-4">
-    <Button
-       onClick={()=>location.href='/ai/generate'}
-      type="button"
-      className="bg-[#A9DFD8] text-black hover:bg-[#61c9bb] transition-colors duration-200"
-    >
-      Generate message 
-    </Button>
-    <CreateCampaignDialog onCampaignCreated={handleCampaignCreated} />
-  </div>
-</div>
-
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <h1 className="text-3xl font-bold text-white">Campaigns</h1>
+        <div className="flex gap-4">
+          <Button
+            onClick={() => location.href = '/ai/generate'}
+            type="button"
+            className="bg-[#A9DFD8] text-black hover:bg-[#61c9bb] transition-colors duration-200"
+          >
+            Generate message 
+          </Button>
+          <CreateCampaignDialog onCampaignCreated={handleCampaignCreated} />
+        </div>
+      </div>
 
       <UpdateCampaignDialog
         campaignId={editingCampaignId}
@@ -141,12 +129,9 @@ export default function CampaignsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {campaigns.map((campaign) => {
               const createdAt = campaign.createdAt || campaign.created_at;
-              const segmentName = typeof campaign.segmentId === 'object' 
-                ? campaign.segmentId.name 
-                : 'Unknown Segment';
-              const audienceSize = typeof campaign.segmentId === 'object' 
-                ? campaign.segmentId.audienceSize 
-                : 0;
+              const segment = typeof campaign.segmentId === 'object' ? campaign.segmentId : null;
+              const segmentName = segment?.name || 'Unknown Segment';
+              const audienceSize = segment?.audienceSize || 0;
 
               return (
                 <Card
@@ -160,11 +145,13 @@ export default function CampaignsPage() {
                     <CardContent className="space-y-2 text-sm">
                       <p>
                         <strong>Status:</strong>{' '}
-                        <Badge variant={
-                          campaign.status === 'sent' ? 'default' :
-                          campaign.status === 'delivered' ? 'secondary' :
-                          campaign.status === 'failed' ? 'destructive' : 'success'
-                        }>
+                        <Badge 
+                          variant={
+                            campaign.status === 'sent' ? 'default' :
+                            campaign.status === 'delivered' ? 'secondary' :
+                            campaign.status === 'failed' ? 'destructive' : 'default'
+                          }
+                        >
                           {campaign.status}
                         </Badge>
                       </p>

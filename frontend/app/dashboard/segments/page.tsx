@@ -1,3 +1,4 @@
+// app/segments/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -6,24 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import CreateSegmentDialog from '@/components/CreateSegmentDialog';
 import UpdateSegmentDialog from '@/components/UpdateSegmentDialog';
-
-type SegmentRule = {
-  field: string;
-  operator: string;
-  value: any;
-}[];
-
-interface Segment {
-  _id: string;
-  name: string;
-  isActive: boolean;
-  createdBy: string | null;
-  segmentRule: SegmentRule;
-  audienceSize: number;
-  scheduledAt: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { Segment } from '@/types/segment';
 
 export default function SegmentsPage() {
   const [segments, setSegments] = useState<Segment[]>([]);
@@ -39,8 +23,8 @@ export default function SegmentsPage() {
       }
       const json = await res.json();
       setSegments(json.data || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
     }
@@ -58,11 +42,11 @@ export default function SegmentsPage() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/segments/${id}`, {
         method: 'DELETE',
       });
-      
+
       if (!res.ok) {
         throw new Error('Failed to delete segment');
       }
-      
+
       setSegments((prev) => prev.filter((s) => s._id !== id));
     } catch (error) {
       alert('Failed to delete the segment.');
@@ -79,14 +63,14 @@ export default function SegmentsPage() {
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-white">Segments</h1>
         <div className="flex gap-4">
-        <Button
-       onClick={()=>location.href='/ai/rulegenerate'}
-      type="button"
-      className="bg-[#A9DFD8] text-black hover:bg-[#61c9bb] transition-colors duration-200"
-    >
-      Rule Generator 
-    </Button>
-        <CreateSegmentDialog onSegmentCreated={fetchSegments} />
+          <Button
+            onClick={() => location.href = '/ai/rulegenerate'}
+            type="button"
+            className="bg-[#A9DFD8] text-black hover:bg-[#61c9bb] transition-colors duration-200"
+          >
+            Rule Generator
+          </Button>
+          <CreateSegmentDialog onSegmentCreated={fetchSegments} />
         </div>
       </div>
 
@@ -136,9 +120,9 @@ export default function SegmentsPage() {
                 </div>
 
                 <div className="mt-4 flex justify-end gap-2">
-                  <UpdateSegmentDialog 
-                    segment={segment} 
-                    onSegmentUpdated={fetchSegments} 
+                  <UpdateSegmentDialog
+                    segment={segment}
+                    onSegmentUpdated={fetchSegments}
                   />
                   <Button
                     size="sm"

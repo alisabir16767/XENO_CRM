@@ -50,7 +50,11 @@ interface CustomLegendPayloadItem {
   color?: string;
 }
 
-function CustomChartLegendContent({ payload }: { payload: CustomLegendPayloadItem[] }) {
+function CustomChartLegendContent(props: { payload?: CustomLegendPayloadItem[] }) {
+  const { payload } = props;
+  
+  if (!payload || payload.length === 0) return null;
+
   return (
     <ul className="flex flex-wrap gap-4 mt-4">
       {payload.map((entry, index) => {
@@ -71,24 +75,20 @@ function CustomChartLegendContent({ payload }: { payload: CustomLegendPayloadIte
 
 export function ChartAreaLegend() {
   const [chartData, setChartData] = useState<ChartDataItem[]>([]);
-  const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get<ChartDataItem[]>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/customer/investments`);
+        const response = await axios.get<ChartDataItem[]>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/customer/investments`
+        );
         setChartData(response.data);
-        
-        // Extract all customers from all months
-        const allCustomers = response.data.flatMap(monthData => monthData.customers);
-        setCustomers(allCustomers);
-        
         setLoading(false);
       } catch (err) {
-        const errorMessage = axios.isAxiosError(err) 
-          ? err.response?.data?.message || err.message 
+        const errorMessage = axios.isAxiosError(err)
+          ? err.response?.data?.message || err.message
           : 'An unknown error occurred';
         setError(errorMessage);
         setLoading(false);

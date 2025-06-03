@@ -67,7 +67,7 @@ export default function CreateSegmentDialog({ onSegmentCreated }: CreateSegmentD
       segmentRule: rules.map(rule => ({
         field: rule.field,
         operator: `$${rule.operator}`,
-        value: isNaN(rule.value) ? rule.value : Number(rule.value)
+        value: Number(rule.value)
       })),
       isActive: true
     };
@@ -91,9 +91,16 @@ export default function CreateSegmentDialog({ onSegmentCreated }: CreateSegmentD
       } else {
         throw new Error(response.data.message || 'Failed to create segment');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error creating segment:", err);
-      alert(err.response?.data?.message || err.message || 'Failed to create segment');
+    
+      if (axios.isAxiosError(err)) {
+        alert(err.response?.data?.message || err.message || 'Failed to create segment');
+      } else if (err instanceof Error) {
+        alert(err.message || 'Failed to create segment');
+      } else {
+        alert('An unknown error occurred');
+      }
     } finally {
       setLoading(false);
     }

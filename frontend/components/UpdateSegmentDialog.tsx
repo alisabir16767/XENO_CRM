@@ -14,22 +14,40 @@ import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+// FIX 1: Correct SegmentRule typing
+interface SegmentRule {
+  field: string;
+  operator: string;
+  value: string | number | boolean | null;
+}
+
+interface Segment {
+  _id: string;
+  name: string;
+  audienceSize: number;
+  segmentRule: SegmentRule[];
+}
+
 interface UpdateSegmentDialogProps {
-  segment: {
-    _id: string;
-    name: string;
-    audienceSize: number;
-    segmentRule: Array<{
-      field: string;
-      operator: string;
-      value: string | number;
-    }>;
-  };
+  segment: Segment;
   onSegmentUpdated: () => void;
 }
 
+// FIX 2: FormRule.value now supports all types as strings (form input is string)
+interface FormRule {
+  field: string;
+  operator: string;
+  value: string;
+}
+
+interface FormData {
+  name: string;
+  audienceSize: string;
+  rules: FormRule[];
+}
+
 export default function UpdateSegmentDialog({ segment, onSegmentUpdated }: UpdateSegmentDialogProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     audienceSize: '',
     rules: [{ field: '', operator: '', value: '' }],
@@ -38,20 +56,25 @@ export default function UpdateSegmentDialog({ segment, onSegmentUpdated }: Updat
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-   if (segment && open) {
-     setFormData({
-       name: segment.name,
-       audienceSize: segment.audienceSize.toString(),
-       rules: segment.segmentRule.map(rule => ({
-         field: rule.field || '',
-         operator: rule.operator ? rule.operator.replace('$', '') : '', 
-         value: rule.value ? rule.value.toString() : ''
-       }))
-     });
-   }
- }, [segment, open]);
+    if (segment && open) {
+      setFormData({
+        name: segment.name,
+        audienceSize: segment.audienceSize.toString(),
+        rules: segment.segmentRule.map(rule => ({
+          field: rule.field || '',
+          operator: rule.operator ? rule.operator.replace('$', '') : '',
+          value:
+            typeof rule.value === 'boolean'
+              ? rule.value.toString()
+              : rule.value !== null
+              ? rule.value.toString()
+              : '',
+        })),
+      });
+    }
+  }, [segment, open]);
 
-  const handleRuleChange = (index: number, key: string, value: string) => {
+  const handleRuleChange = (index: number, key: keyof FormRule, value: string) => {
     const updatedRules = [...formData.rules];
     updatedRules[index] = { ...updatedRules[index], [key]: value };
     setFormData({ ...formData, rules: updatedRules });
@@ -69,33 +92,46 @@ export default function UpdateSegmentDialog({ segment, onSegmentUpdated }: Updat
     setFormData({ ...formData, rules: updatedRules });
   };
 
+  const isNumericString = (value: string): boolean => {
+    return !isNaN(Number(value)) && !isNaN(parseFloat(value));
+  };
+
+  // FIX 3: Convert string "true"/"false" to boolean, numbers to number
+  const parseValue = (value: string): string | number | boolean => {
+    const lower = value.toLowerCase();
+    if (lower === 'true') return true;
+    if (lower === 'false') return false;
+    if (isNumericString(value)) return Number(value);
+    return value;
+  };
+
   const handleSubmit = async () => {
     const { name, audienceSize, rules } = formData;
-  
+
     if (!name.trim() || !audienceSize.trim()) {
       alert('Please fill out name and audience size.');
       return;
     }
-  
+
     const invalidRule = rules.some(rule =>
       !rule.field.trim() || !rule.operator.trim() || !rule.value.trim()
     );
-  
+
     if (invalidRule) {
       alert('Please complete all rule fields.');
       return;
     }
-  
+
     const payload = {
       name,
       audienceSize: Number(audienceSize),
       segmentRule: rules.map(rule => ({
         field: rule.field,
         operator: `$${rule.operator}`,
-        value: isNaN(rule.value as any) ? rule.value : Number(rule.value)
+        value: parseValue(rule.value),
       })),
     };
-  
+
     setLoading(true);
     try {
       const response = await axios.put(
@@ -103,7 +139,7 @@ export default function UpdateSegmentDialog({ segment, onSegmentUpdated }: Updat
         payload,
         { withCredentials: true }
       );
-  
+
       if (response.data.success) {
         alert('Segment updated successfully!');
         setOpen(false);
@@ -111,9 +147,10 @@ export default function UpdateSegmentDialog({ segment, onSegmentUpdated }: Updat
       } else {
         throw new Error(response.data.message || 'Failed to update segment');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error updating segment:", err);
-      alert(err.response?.data?.message || err.message || 'Failed to update segment');
+      const error = err as { response?: { data?: { message?: string } }, message?: string };
+      alert(error.response?.data?.message || error.message || 'Failed to update segment');
     } finally {
       setLoading(false);
     }
@@ -122,7 +159,7 @@ export default function UpdateSegmentDialog({ segment, onSegmentUpdated }: Updat
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="ml-2  bg-[#A9DFD8] text-black hover:bg-[#61c9bb]">
+        <Button variant="outline" className="ml-2 bg-[#A9DFD8] text-black hover:bg-[#61c9bb]">
           Edit
         </Button>
       </DialogTrigger>
@@ -167,7 +204,7 @@ export default function UpdateSegmentDialog({ segment, onSegmentUpdated }: Updat
                   onChange={(e) => handleRuleChange(index, 'operator', e.target.value)}
                 />
                 <Input
-                  placeholder="Value (e.g. 18)"
+                  placeholder="Value (e.g. 18, true, India)"
                   value={rule.value}
                   onChange={(e) => handleRuleChange(index, 'value', e.target.value)}
                 />

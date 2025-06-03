@@ -116,9 +116,17 @@ export default function UpdateCustomerDialog({
       } else {
         throw new Error(response.data.message || `Failed to ${mode} customer`);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(`Error ${mode}ing customer:`, err);
-      alert(err.response?.data?.message || err.message || `Failed to ${mode} customer`);
+      
+      let errorMessage = `Failed to ${mode} customer`;
+      if (axios.isAxiosError(err)) {
+        errorMessage = err.response?.data?.message || err.message || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }

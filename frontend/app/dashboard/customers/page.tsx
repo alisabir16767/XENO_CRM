@@ -21,7 +21,6 @@ const CustomersPage = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   const fetchCustomers = async () => {
     try {
@@ -30,9 +29,7 @@ const CustomersPage = () => {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/customer`, {
         cache: 'no-store',
       });
-      if (!res.ok) {
-        throw new Error('Failed to fetch customers');
-      }
+      if (!res.ok) throw new Error('Failed to fetch customers');
       const data = await res.json();
       setCustomers(data.customers);
     } catch (err) {
@@ -67,10 +64,7 @@ const CustomersPage = () => {
     <div className="p-6 bg-[#2B2B36] rounded-2xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-semibold">Customer List</h1>
-        <UpdateCustomerDialog 
-          mode="create" 
-          onCustomerUpdated={fetchCustomers}
-        />
+        <UpdateCustomerDialog mode="create" onCustomerUpdated={fetchCustomers} />
       </div>
 
       <Card className="bg-[#171821] text-white border-none">
@@ -98,7 +92,7 @@ const CustomersPage = () => {
                   </TableCell>
                   <TableCell className="flex gap-2">
                     <UpdateCustomerDialog
-                      customer={customer}
+                      customer={{...customer, phone: customer.phone || ''}}
                       mode="update"
                       onCustomerUpdated={fetchCustomers}
                     >
