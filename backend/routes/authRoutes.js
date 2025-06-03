@@ -2,27 +2,28 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router();
 
-router.get(
-  "/auth/google",
+router.get("/auth/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-router.get(
-  "/auth/google/callback",
+router.get("/auth/google/callback",
   passport.authenticate("google", {
-    successRedirect: `${process.env.FRONTEND_URL}/dashboard`,
     failureRedirect: `${process.env.FRONTEND_URL}/login`,
-  })
+    session: true, // Make sure session is stored
+  }),
+  (req, res) => {
+    // Successful auth — now redirect
+    res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+  }
 );
+
 router.get("/user", (req, res) => {
   try {
     if (req.isAuthenticated() && req.user) {
       const user = {
         name: req.user.name || req.user.displayName || "No Name",
         avatar:
-          req.user.photos && req.user.photos.length > 0
-            ? req.user.photos[0].value
-            : req.user.avatar || "",
+          req.user.photos?.[0]?.value || req.user.avatar || "",
       };
       res.json(user);
     } else {
@@ -35,13 +36,17 @@ router.get("/user", (req, res) => {
 });
 
 router.get("/logout", (req, res) => {
-  // Clear the session or token
-  req.logout((err) => {
-    if (err) {
-      return res.status(500).json({ message: "Logout failed" });
-    }
+  req.logout(function(err) {
+    if (err) return res.status(500).json({ message: "Logout failed" });
 
-    res.status(200).json({ message: "Logout successful" });
+    req.session.destroy(() => {
+      res.clearCookie("connect.sid", {
+        path: "/",
+        sameSite: "none",
+        secure: true,
+      });
+      res.status(200).json({ message: "Logout successful" });
+    });
   });
 });
 
