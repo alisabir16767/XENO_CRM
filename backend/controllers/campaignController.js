@@ -1,5 +1,5 @@
 const Campaign = require("../models/Campaign");
-const Segment = require("../models/segment");
+const Segment = require("../models/Segment");
 
 exports.createCampaign = async (req, res) => {
   try {
