@@ -1,4 +1,4 @@
-const Segment = require("../models/segment");
+const Segment = require("../models/Segment");
 const Customer = require("../models/Customer");
 
 const matchesRule = (customer, rules) => {
