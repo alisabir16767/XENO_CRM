@@ -61,7 +61,7 @@ export function AppSidebar() {
       <SidebarContent className="p-4">
         <SidebarGroup>
           <SidebarGroupLabel className="text-lg font-semibold text-[#A9DFD8] text-xl mb-3">
-            Xeno
+            GenCRM
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-">
