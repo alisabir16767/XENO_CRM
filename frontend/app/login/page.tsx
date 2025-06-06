@@ -14,7 +14,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#1b1c1d] text-white relative px-6 py-8 overflow-hidden">
       {/* Top-Left Logo */}
       <div className="absolute top-6 left-6">
-        <h1 className="text-3xl font-bold text-[#A9DFD8]">Xeno</h1>
+        <h1 className="text-3xl font-bold text-[#A9DFD8]">Segmentor.AI CRM</h1>
       </div>
 
       {/* Main Content */}
