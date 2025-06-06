@@ -1,4 +1,4 @@
-# 🎯 Mini CRM Platform – Xeno SDE Internship Assignment 2025
+# 🎯 Mini AI enabled CRM Platform 
 
 ## 🚀 Overview
 
