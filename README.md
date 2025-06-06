@@ -2,7 +2,9 @@
 
 ## 🚀 Overview
 
-This is a **Mini CRM Platform** built for the Xeno SDE Internship Assignment 2025. The application enables users to ingest customer/order data, build smart customer segments, run targeted campaigns, and leverage AI to enhance campaign effectiveness.
+This is a **Mini CRM Platform** built for learning purpose. The application enables users to ingest customer/order data, build smart customer segments, run targeted campaigns, and leverage AI to enhance campaign effectiveness.
+
+
 
 ---
 
