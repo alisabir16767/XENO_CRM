@@ -4,6 +4,9 @@
 
 This is a **Mini CRM Platform** built for learning purpose. The application enables users to ingest customer/order data, build smart customer segments, run targeted campaigns, and leverage AI to enhance campaign effectiveness.
 
+## VIDEO 
+
+
 
 
 ---
