@@ -37,7 +37,7 @@ export default function GenerateMessages() {
     }
   };
 
-  // Typewriter effect
+
   useEffect(() => {
     if (messages.length === 0) return;
 
@@ -61,7 +61,7 @@ export default function GenerateMessages() {
         if (i >= message.length) {
           clearInterval(typing);
           current++;
-          setTimeout(typeNextMessage, 300); // Delay before next message
+          setTimeout(typeNextMessage, 300); 
         }
       }, 30);
     };
