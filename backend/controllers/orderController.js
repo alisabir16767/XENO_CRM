@@ -1,6 +1,5 @@
 const Order = require("../models/Order");
 
-// Create Order
 const createOrder = async (req, res) => {
   try {
     const { customer, order_amount } = req.body;
@@ -20,7 +19,6 @@ const createOrder = async (req, res) => {
   }
 };
 
-// Get All Orders
 const getOrders = async (req, res) => {
   try {
     const orders = await Order.find().populate("customer");
@@ -33,7 +31,6 @@ const getOrders = async (req, res) => {
   }
 };
 
-// Get Order by ID
 const getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id).populate("customer");
@@ -47,7 +44,6 @@ const getOrderById = async (req, res) => {
   }
 };
 
-// Update Order
 const updateOrder = async (req, res) => {
   try {
     const { order_amount } = req.body;
@@ -67,7 +63,6 @@ const updateOrder = async (req, res) => {
   }
 };
 
-// Delete Order
 const deleteOrder = async (req, res) => {
   try {
     const deletedOrder = await Order.findByIdAndDelete(req.params.id);
@@ -83,7 +78,6 @@ const deleteOrder = async (req, res) => {
   }
 };
 
-// Get Total Earnings
 const getTotalEarnings = async (req, res) => {
   try {
     const orders = await Order.find({});
@@ -108,7 +102,6 @@ const getTotalEarnings = async (req, res) => {
   }
 };
 
-// Get Monthly Earnings
 const getMonthlyEarnings = async (req, res) => {
   try {
     const monthlyEarnings = await Order.aggregate([
