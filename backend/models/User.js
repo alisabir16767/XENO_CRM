@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
     },
     name: {
       type: String,
-      required: true, // ✅ Required for Google login
+      required: true, 
     },
     email: {
       type: String,
@@ -18,12 +18,12 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
     },
     avatar: {
-      type: String, // URL to profile picture
+      type: String, 
     },
     role: {
       type: String,
       enum: ["admin", "user"],
-      default: "user", // ✅ Best practice
+      default: "user", 
     },
   },
   { timestamps: true }
