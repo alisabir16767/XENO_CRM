@@ -88,7 +88,6 @@ exports.getRecentCampaigns = async (req, res) => {
   }
 };
 
-// FIXED: Changed function name from getRecentCampaignPerformance to getCampaignPerformance
 exports.getCampaignPerformance = async (req, res) => {
   try {
     const recentCampaign = await Campaign.findOne()
@@ -99,7 +98,6 @@ exports.getCampaignPerformance = async (req, res) => {
         .status(404)
         .json({ success: false, message: "No campaigns found" });
     }
-    // Example delivery stats — adjust this based on your app's logic
     const deliveryStats = {
       status: recentCampaign.status,
       delivered: recentCampaign.status === "delivered" ? 1 : 0,
@@ -130,7 +128,6 @@ exports.updateCampaign = async (req, res) => {
       });
     }
 
-    // Update the fields if provided
     if (name) campaign.name = name;
     if (segmentId) campaign.segmentId = segmentId;
     if (message) campaign.message = message;

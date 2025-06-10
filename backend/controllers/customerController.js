@@ -129,7 +129,6 @@ exports.deleteCustomer = async (req, res) => {
 
 exports.getCustomerInvestments = async (req, res) => {
   try {
-    // Aggregate customer data with their orders
     const data = await Order.aggregate([
       {
         $lookup: {
@@ -169,7 +168,6 @@ exports.getCustomerInvestments = async (req, res) => {
       { $sort: { _id: 1 } },
     ]);
 
-    // Format the data for the chart
     const monthNames = [
       "January",
       "February",

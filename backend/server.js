@@ -48,7 +48,6 @@ app.use(passport.session());
 
 connectDB();
 
-// Routes
 app.use("/", authRoute);
 app.use("/api/v1/customer", customerRoute);
 app.use("/api/v1/order", orderRoute);

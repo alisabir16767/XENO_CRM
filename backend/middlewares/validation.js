@@ -1,4 +1,3 @@
-// Validation middleware for text generation
 const validateGenerateText = (req, res, next) => {
   const { prompt } = req.body;
 
@@ -21,7 +20,6 @@ const validateGenerateText = (req, res, next) => {
   next();
 };
 
-// Validation middleware for chat
 const validateChatMessage = (req, res, next) => {
   const { message } = req.body;
 
@@ -44,10 +42,8 @@ const validateChatMessage = (req, res, next) => {
   next();
 };
 
-// Rate limiting middleware (basic implementation)
 const rateLimiter = (req, res, next) => {
-  // In production, use redis or database for rate limiting
-  // This is a simple in-memory implementation
+
   const clientIp = req.ip;
   const now = Date.now();
 
@@ -59,7 +55,6 @@ const rateLimiter = (req, res, next) => {
   const recentRequests = clientRequests.filter((time) => now - time < 60000); // Last minute
 
   if (recentRequests.length >= 10) {
-    // 10 requests per minute
     return res.status(429).json({
       success: false,
       error: "Rate limit exceeded",
